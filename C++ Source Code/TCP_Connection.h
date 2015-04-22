@@ -12,8 +12,8 @@
 #include <string>
 
 #define SERVER_IP "129.120.151.97" //cse04.cse.unt.edu
-#define SERVER_PORT	60000
-#define LISTEN_PORT	60000
+#define SERVER_PORT	52216
+#define LISTEN_PORT	52216
 
 using namespace std;
 //class used for TCP connections
@@ -27,6 +27,8 @@ class TCP_Connection
 		void ReceiveData();//wait in a loop for incomming data
 		void CreateOutboundSocket(string ip, unsigned short port);//create an outbound connection to some server
 		void SendToOutboundSocket(char* buffer, int size);//send data to server
+    void WaitForInboundConnection();
+    void SendData(char* buffer, int size);
     ~TCP_Connection();//close connection
 
 	private:

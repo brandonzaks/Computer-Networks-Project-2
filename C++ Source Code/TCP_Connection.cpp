@@ -6,6 +6,9 @@
 
 void TCP_Connection::CreateInboundSocket()
 {
+  close(socketAcceptDescriptor);//close socketAcceptDescriptor
+  close(socketListenDescriptor);//close socketListenDescriptor
+  
 	int optionValue = 1;
 	int result = 0;
   //zero out localEndpointAddress struct
@@ -80,16 +83,16 @@ void TCP_Connection::CreateInboundSocket()
 		printf("accept() Success\n");
 }
 
-void TCP_Connection::ReceiveData()
+void TCP_Connection::WaitForInboundConnection()
 {
   memset(buffer, 0, 5000000);
     
   bytesReceived = 0;
-  //continue to check for new data coming in until we break out
+    
 	while (true)
 	{
-		bytesReceived = recv(socketSendDescriptor, buffer, sizeof(buffer), 0);//receieve data into a byte buffer
-    //error message if we get -1
+		bytesReceived = recv(socketAcceptDescriptor, buffer, sizeof(buffer), 0);
+
 		if (bytesReceived == -1)
 		{
 			printf("recv() Failed\n");
@@ -101,6 +104,52 @@ void TCP_Connection::ReceiveData()
 			printf("recv() Success\n");
 
 		return;
+	}
+}
+
+void TCP_Connection::SendData(char* buffer, int size)
+{
+	ssize_t bytesSent;
+
+  int sent = 0;
+  
+  while(sent < size)
+  {
+    bytesSent = send(socketAcceptDescriptor, buffer+sent, size-sent, 0);//send byte array to server
+    
+    //handle error
+    if (bytesSent == -1)
+    {
+      printf("send() Failed\n");
+      printf("Error: %s\n",strerror(errno));
+      exit(0);
+    }
+    
+    sent += bytesSent;
+  }
+	//else
+		//printf("send() Success\n");
+}
+
+void TCP_Connection::ReceiveData()
+{
+  memset(buffer, 0, 5000000);
+    
+  bytesReceived = 0;
+  //continue to check for new data coming in until we break out
+	while ((bytesReceived = recv(socketSendDescriptor, &buffer[bytesReceived], sizeof(buffer), 0)) > 0)
+	{
+		//bytesReceived = recv(socketSendDescriptor, buffer, sizeof(buffer), 0);//receieve data into a byte buffer
+    //error message if we get -1
+		if (bytesReceived == -1)
+		{
+			printf("recv() Failed\n");
+      printf("Error: %s\n",strerror(errno));
+			exit(0);
+		}
+
+		else if (bytesReceived > 0)
+			printf("recv() Success\n");
 	}
 }
 

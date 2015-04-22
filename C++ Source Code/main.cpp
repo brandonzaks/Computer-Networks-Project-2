@@ -61,10 +61,38 @@ int main()
   //char* ipAddress;
   string URL, ipAddress, page;
   TCP_Connection tcp_Connection;
+	
+  //Create connection for inbound connections
+	tcp_Connection.CreateInboundSocket();
+ //wait for data to come in
+  tcp_Connection.WaitForInboundConnection();
+//copy header into header struct
+	fprintf(stderr, "Query is:\n<<START>>\n%s<<END>>\n", tcp_Connection.buffer);
+ 
+ int startPosition, endPosition;
+ startPosition = endPosition = 0;
+   for (int i = 0; i < 5000000; i++)
+   {
+     if (tcp_Connection.buffer[i] == 47 && startPosition == 0)
+     {
+       startPosition = i + 1;
+     }
+     
+     if (tcp_Connection.buffer[i] == 32 && startPosition > 0)
+     {
+       endPosition = i;
+       break;
+     }
+   }
+   
+   URL.assign(&tcp_Connection.buffer[startPosition],endPosition - startPosition);
+   
+   cout << URL << endl;
+  
+  
   
   page = "/";
   
-  URL = "www.google.com";
   ipAddress.assign(get_ip(URL));
   
   cout << ipAddress;
@@ -79,6 +107,62 @@ int main()
   tcp_Connection.ReceiveData();
   
   fprintf(stderr, "Query is:\n<<START>>\n%s<<END>>\n", tcp_Connection.buffer);
+  
+  tcp_Connection.SendData(tcp_Connection.buffer, strlen(tcp_Connection.buffer));
+  
+  tcp_Connection.CreateInboundSocket();
+  tcp_Connection.WaitForInboundConnection();
+//copy header into header struct
+	fprintf(stderr, "Query is:\n<<START>>\n%s<<END>>\n", tcp_Connection.buffer);
+  
+  while (true)
+  {
+  
+ 
+ 
+ startPosition = endPosition = 0;
+   for (int i = 0; i < 5000000; i++)
+   {
+     if (tcp_Connection.buffer[i] == 47 && startPosition == 0)
+     {
+       startPosition = i + 1;
+     }
+     
+     if (tcp_Connection.buffer[i] == 32 && startPosition > 0)
+     {
+       endPosition = i;
+       break;
+     }
+   }
+   
+   page.assign(&tcp_Connection.buffer[startPosition],endPosition - startPosition);
+   
+   cout << page << endl;
+   
+   //page = "/";
+   
+   get = build_get_query(URL, page);
+  fprintf(stderr, "Query is:\n<<START>>\n%s<<END>>\n", get);
+ 
+ 
+  
+  tcp_Connection.CreateOutboundSocket(ipAddress, port);
+  
+  tcp_Connection.SendToOutboundSocket(get, strlen(get));
+  
+  memset(tcp_Connection.buffer, 0, 5000000);
+  tcp_Connection.ReceiveData();
+  
+  fprintf(stderr, "Query is:\n<<START>>\n%s<<END>>\n", tcp_Connection.buffer);
+  
+  tcp_Connection.SendData(tcp_Connection.buffer, strlen(tcp_Connection.buffer));
+  
+  tcp_Connection.CreateInboundSocket();
+  tcp_Connection.WaitForInboundConnection();
+//copy header into header struct
+	fprintf(stderr, "Query is:\n<<START>>\n%s<<END>>\n", tcp_Connection.buffer);
+  }
+ 
   
 
   
