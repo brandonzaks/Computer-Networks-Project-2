@@ -1,3 +1,8 @@
+insert into BlackList (URL) values ('www.facebook.com');
+insert into BlackList (URL) values ('www.youtube.com');
+insert into BlackList (URL) values ('www.hulu.com');
+insert into BlackList (URL) values ('www.virus.com');
+
 insert into VulgarLanguageList (VulgarWord) values ('Alcoholic');
 insert into VulgarLanguageList (VulgarWord) values ('Amateur');
 insert into VulgarLanguageList (VulgarWord) values ('Analphabet');
