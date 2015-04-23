@@ -10,3 +10,7 @@ SET @URL = 'www.msn.com';
 SET @FileName = 'index.html';
 SET @Location = 'FileStore/www.msn.com/';
 CALL add_website_file_path(@URL,@FileName,@Location);
+
+SET @URL = 'www.msn.com';
+CALL get_website_file_path(@URL,@FilePath);
+select @FilePath;
