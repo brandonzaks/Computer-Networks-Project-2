@@ -16,17 +16,17 @@ END $$
 DELIMITER;
 
 DELIMITER $$
-CREATE PROCEDURE is_vulgar_word(in VulgarWord varchar(255),
-                                out isExist bool)
+CREATE PROCEDURE get_vulgar_word(in ID int,
+                                 out VulgarWord varchar(255))
 BEGIN
   DECLARE temp int;
-  set isExist = 0;
+  set VulgarWord = '';
   
-  select count(*) into temp from VulgarLanguageList where VulgarLanguageList.VulgarWord = VulgarWord;
+  select count(*) into temp from VulgarLanguageList where VulgarLanguageList.ID = ID;
   
   IF (temp > 0) THEN
   BEGIN
-    set isExist = 1;
+    select VulgarLanguageList.VulgarWord into VulgarWord from VulgarLanguageList where VulgarLanguageList.ID = ID;
   END;
   END IF;
 END $$
