@@ -40,3 +40,20 @@ BEGIN
   insert into WebsiteCacheLocation (URL, FileName, Location) values (URL, FileName, Location);
 END $$
 DELIMITER;
+
+DELIMITER $$
+CREATE PROCEDURE get_website_file_path(in URL varchar(255),
+                                       out FilePath varchar(255))
+BEGIN
+  DECLARE temp int;
+  set FilePath = '';
+  
+  select count(*) into temp from WebsiteCacheLocation where WebsiteCacheLocation.URL = URL;
+  
+  IF (temp > 0) THEN
+  BEGIN
+    select WebsiteCacheLocation.Location + WebsiteCacheLocation.FileName into FilePath from WebsiteCacheLocation where WebsiteCacheLocation.URL = URL;
+  END;
+  END IF;
+END $$
+DELIMITER;
