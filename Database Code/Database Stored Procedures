@@ -1,0 +1,16 @@
+DELIMITER $$
+CREATE PROCEDURE is_blacklisted(in URL varchar(255),
+                                out isExist bool)
+BEGIN
+  DECLARE temp int;
+  set isExist = 0;
+  
+  select count(*) into temp from BlackList where BlackList.URL = URL;
+  
+  IF (temp > 0) THEN
+  BEGIN
+    set isExist = 1;
+  END;
+  END IF;
+END $$
+DELIMITER;
