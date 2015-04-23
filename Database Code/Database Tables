@@ -11,3 +11,12 @@ CREATE TABLE VulgarLanguageList
   VulgarWord varchar(255) NOT NULL,
   PRIMARY KEY(ID)
 );
+
+CREATE TABLE WebsiteCacheLocation
+(
+  ID int NOT NULL AUTO_INCREMENT,
+  URL varchar(255) NOT NULL,
+  FileName varchar(255) NOT NULL,
+  Location varchar(255) NOT NULL,
+  PRIMARY KEY(ID)
+);
