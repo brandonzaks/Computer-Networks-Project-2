@@ -5,11 +5,58 @@
 #include <stdio.h>
 #include <netdb.h>
 #include <iostream>
+#include <fstream>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
+#include "Database.h"
+
+Database database;
 
 using namespace std;
 
 #define PORT 80
 #define USERAGENT "Proxy Server"
+
+void cleanLanguage(char* buffer, int length)
+{
+  string vulgarWord = "";
+  int matchCount = 0;
+  
+  for (int i = 0; i < length; i++)
+  {
+    for (int j = 1; j < 2; j++)
+    {
+      vulgarWord = database.get_vulgar_word(j);
+      
+      if (vulgarWord.size() <= length - i)
+      {
+        matchCount = 0;
+        
+        for (int k = 0; k < vulgarWord.size(); k++)
+        {
+          if (vulgarWord.c_str()[k] == buffer[i + k])
+          {
+            matchCount++;
+          }
+          
+          else
+          {
+            break;
+          }
+        }
+        
+        if (matchCount == vulgarWord.size())
+        {
+          for (int m = 0; m < vulgarWord.size(); m++)
+          {
+            buffer[i + m] = '!';
+          }
+        }
+      }
+    }
+  } 
+}
 
 char *build_get_query(string host, string page)
 {
@@ -27,6 +74,13 @@ char *build_get_query(string host, string page)
   sprintf(query, tpl, page.c_str(), host.c_str(), USERAGENT);
   
   return query;
+}
+
+char *build_400()
+{
+  char tpl[] = "HTTP/1.0 400 Bad Request\r\nConnection: close\r\n\r\n";
+  
+  return tpl;
 }
 
 char *get_ip(string host)
@@ -54,23 +108,23 @@ char *get_ip(string host)
 int main()
 {
   char *get;
+  char error[] = "HTTP/1.0 400 Bad Request\r\nConnection: close\r\n\r\n";
+  char success[] = "HTTP/1.0 200 OK\r\nConnection: close\r\n\r\n";
   char *host;
   unsigned short port = 80;
-  //char *page;
-
-  //char* ipAddress;
+  char* buffer;
+  string newurl = "";
   string URL, ipAddress, page;
   TCP_Connection tcp_Connection;
-	
-  //Create connection for inbound connections
-	tcp_Connection.CreateInboundSocket();
- //wait for data to come in
-  tcp_Connection.WaitForInboundConnection();
-//copy header into header struct
-	fprintf(stderr, "Query is:\n<<START>>\n%s<<END>>\n", tcp_Connection.buffer);
- 
- int startPosition, endPosition;
+  int startPosition, endPosition;
  startPosition = endPosition = 0;
+  
+	tcp_Connection.CreateInboundSocket();
+  
+  tcp_Connection.WaitForInboundConnection();
+  
+  fprintf(stderr, "Query is:\n<<Browser Request>>\n%s<<Browser Request>>\n", tcp_Connection.buffer);
+ 
    for (int i = 0; i < 5000000; i++)
    {
      if (tcp_Connection.buffer[i] == 47 && startPosition == 0)
@@ -85,28 +139,107 @@ int main()
      }
    }
    
-   URL.assign(&tcp_Connection.buffer[startPosition],endPosition - startPosition);
+   URL.assign(&tcp_Connection.buffer[startPosition], endPosition - startPosition);
    
-   cout << URL << endl;
+   cout << "URL Passed from browser: " << URL << endl;
+   
+   int count2 = 0;
+   for (int i = 8; i < URL.size(); i++)
+   {
+     if (URL.c_str()[i] == '/')
+     {
+       count2 = i;
+       break;
+     }
+   }
   
+  newurl = URL.substr(7, count2 - 7);
   
+  cout << "New URL created from above URL: " << newurl << endl;
   
-  page = "/";
+  page = URL.substr(count2, URL.size() - count2);
   
-  ipAddress.assign(get_ip(URL));
+  if (newurl.size() == (URL.size() - 7))
+    page = "/";
   
-  cout << ipAddress;
+  cout << "Requested Page: " << page << endl;
   
-  get = build_get_query(URL, page);
-  fprintf(stderr, "Query is:\n<<START>>\n%s<<END>>\n", get);
+  ipAddress.assign(get_ip(newurl));
   
-  tcp_Connection.CreateOutboundSocket(ipAddress, port);
+  cout << "IP Address of requested site: " << ipAddress << endl;
   
-  tcp_Connection.SendToOutboundSocket(get, strlen(get));
+  if (database.is_blacklisted(newurl) == true)
+  {
+    tcp_Connection.SendData(error, strlen(error));
+    fprintf(stderr, "Query is:\n<<Error Response to Browser>>\n%s<<Error Response to Browser>>\n", error);
+  }
   
-  tcp_Connection.ReceiveData();
+  else
+  {
+    get = build_get_query(newurl, page);
+    fprintf(stderr, "Query is:\n<<Request Message to URL>>\n%s<Request Message to URL>>\n", get);
+    
+    tcp_Connection.CreateOutboundSocket(ipAddress, port);
+    
+    tcp_Connection.SendToOutboundSocket(get, strlen(get));
+    
+    tcp_Connection.ReceiveData();
+    
+    int location = 0;
+    for (int i = 0; i < 5000000; i++)
+    {
+      if (i < (5000000 - 4) && tcp_Connection.buffer[i] == 13 && tcp_Connection.buffer[i+1] == 10 && tcp_Connection.buffer[i+2] == 13 && tcp_Connection.buffer[i+3] == 10)
+      {
+        location = i;
+        break;
+     }
+   }
+   
+   buffer = new char[5000000 - location+4];
+   
+   int count = 0;
+   for (int i = location+4; i < strlen(tcp_Connection.buffer); i++)
+   {
+     buffer[count] = tcp_Connection.buffer[i];
+     count++;
+   }
+   
+   cleanLanguage(buffer, count - 1);
+   //fprintf(stderr, "Query is:\n<<START>>\n%s<<END>>\n", buffer);
+   
+   struct stat st = {0};
+
+  string FilePath = database.get_website_file_path(URL);
+  string Location = "";
+
+  if (FilePath == "")
+  {
+    database.add_website_file_path(URL, "index.html", "FileStore/" + URL + "/");
+    Location = "FileStore/" + URL + "/";
+    cout << Location << endl;
+    if (stat(Location.c_str(), &st) == -1)
+    {
+      mkdir(Location.c_str(), 0700);
+    }
+
+    FilePath = Location + "index.html";
+    std::ofstream file(FilePath.c_str(), std::ios::binary);
+
+    file.write(&buffer[0], strlen(buffer));
+  }
+  int count3 = 0;
+  for (int i = 0; i < strlen(success); i++)
+  {
+    tcp_Connection.buffer[i] = success[i];
+    count3++;
+  }
   
-  fprintf(stderr, "Query is:\n<<START>>\n%s<<END>>\n", tcp_Connection.buffer);
+  for (int i = 0; i < strlen(buffer); i++)
+  {
+    tcp_Connection.buffer[i+count3] = buffer[i];
+  }
+   
+  fprintf(stderr, "\nQuery is:\n<<START>>\n%s<<END>>\n\n", tcp_Connection.buffer);
   
   tcp_Connection.SendData(tcp_Connection.buffer, strlen(tcp_Connection.buffer));
   
@@ -164,7 +297,7 @@ int main()
   }
  
   
-
+}
   
   //printf("%s", ipAddress);
   //TCP_Connection tcp_Connection;
