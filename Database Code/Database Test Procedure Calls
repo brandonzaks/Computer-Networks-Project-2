@@ -5,3 +5,8 @@ select @isExist;
 SET @ID = 1;
 CALL get_vulgar_word(@ID,@VulgarWord);
 select @VulgarWord;
+
+SET @URL = 'www.msn.com';
+SET @FileName = 'index.html';
+SET @Location = 'FileStore/www.msn.com/';
+CALL add_website_file_path(@URL,@FileName,@Location);
