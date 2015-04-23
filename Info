@@ -1,0 +1,2 @@
+How to logon to the database..
+mysql --host=student-db.cse.unt.edu --user=bpz0002 --password=bpz0002 bpz0002
