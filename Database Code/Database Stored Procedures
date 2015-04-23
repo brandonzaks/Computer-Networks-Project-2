@@ -14,3 +14,20 @@ BEGIN
   END IF;
 END $$
 DELIMITER;
+
+DELIMITER $$
+CREATE PROCEDURE is_vulgar_word(in VulgarWord varchar(255),
+                                out isExist bool)
+BEGIN
+  DECLARE temp int;
+  set isExist = 0;
+  
+  select count(*) into temp from VulgarLanguageList where VulgarLanguageList.VulgarWord = VulgarWord;
+  
+  IF (temp > 0) THEN
+  BEGIN
+    set isExist = 1;
+  END;
+  END IF;
+END $$
+DELIMITER;
