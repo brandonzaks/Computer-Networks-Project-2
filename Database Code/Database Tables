@@ -4,3 +4,10 @@ CREATE TABLE BlackList
   URL varchar(255) NOT NULL,
   PRIMARY KEY(ID)
 );
+
+CREATE TABLE VulgarLanguageList
+(
+  ID int NOT NULL AUTO_INCREMENT,
+  VulgarWord varchar(255) NOT NULL,
+  PRIMARY KEY(ID)
+);
