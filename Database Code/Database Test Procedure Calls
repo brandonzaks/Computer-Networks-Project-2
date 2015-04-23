@@ -3,5 +3,5 @@ CALL is_blacklisted(@URL,@isExist);
 select @isExist;
 
 SET @ID = 1;
-CALL is_vulgar_word(@ID,@VulgarWord);
+CALL get_vulgar_word(@ID,@VulgarWord);
 select @VulgarWord;
