@@ -2,6 +2,6 @@ SET @URL = 'www.facebook.com';
 CALL is_blacklisted(@URL,@isExist);
 select @isExist;
 
-SET @VulgarWord = 'Bugger, silly';
-CALL is_vulgar_word(@VulgarWord,@isExist);
-select @isExist;
+SET @ID = 1;
+CALL is_vulgar_word(@ID,@VulgarWord);
+select @VulgarWord;
