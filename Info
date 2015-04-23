@@ -1,2 +1,6 @@
 How to logon to the database..
 mysql --host=student-db.cse.unt.edu --user=bpz0002 --password=bpz0002 bpz0002
+
+g++ -c -I Boost/boost_1_57_0 -I C++MySQLConnector/mysql-connector-c++-1.1.5-linux-ubuntu12.04-x86-32bit/include main1.cpp Database.cpp TCP_Connection.cpp
+g++ -o a.out main1.o Database.o TCP_Connection.o -L C++MySQLConnector/mysql-connector-c++-1.1.5-linux-ubuntu12.04-x86-32bit/lib -lmysqlcppconn
+LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib ./a.out
