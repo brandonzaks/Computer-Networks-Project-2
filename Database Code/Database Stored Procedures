@@ -37,6 +37,6 @@ CREATE PROCEDURE add_website_file_path(in URL varchar(255),
                                        in FileName varchar(255),
                                        in Location varchar(255))
 BEGIN
-  insert into WebsiteCacheLocation values (URL, FileName, Location);
+  insert into WebsiteCacheLocation (URL, FileName, Location) values (URL, FileName, Location);
 END $$
 DELIMITER;
