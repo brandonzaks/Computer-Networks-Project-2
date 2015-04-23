@@ -1,0 +1,3 @@
+SET @URL = 'www.facebook.com';
+CALL is_blacklisted(@URL,@isExist);
+select @isExist;
