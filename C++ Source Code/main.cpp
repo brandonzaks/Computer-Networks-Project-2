@@ -204,40 +204,73 @@ int main()
      count++;
    }
    
-   cleanLanguage(buffer, count - 1);
-   //fprintf(stderr, "Query is:\n<<START>>\n%s<<END>>\n", buffer);
-   
    struct stat st = {0};
+   
+   string FilePath = database.get_website_file_path(URL);
+   string Location = "";
+   string Location2 = "";
+   
+   if (FilePath == "")
+   {
+     cleanLanguage(buffer, count - 1);
+     
+     int count3 = 0;
+     for (int i = 0; i < strlen(success); i++)
+     {
+       tcp_Connection.buffer[i] = success[i];
+       count3++;
+     }
+     
+     database.add_website_file_path(URL, "index.html", "FileStore/" + newurl + "/");
+     Location = "FileStore/" + newurl + "/";
+     Location2 = "FileStore/" + newurl;
+     cout << Location << endl;
+     cout << Location2 << endl;
+     if (stat(Location2.c_str(), &st) == -1)
+     {
+       mkdir(Location2.c_str(), 0700);
+     }
+     
+     FilePath = Location + "index.html";
+     cout << FilePath << endl;
+     std::ofstream file(FilePath.c_str(), std::ios::binary);
+     
+     file.write(&buffer[0], strlen(buffer));
+     
+     for (int i = 0; i < strlen(buffer); i++)
+     {
+       tcp_Connection.buffer[i+count3] = buffer[i];
+     }
+     
+     delete[] buffer;
+   }
+   
+   else
+   {
+     int count3 = 0;
+     for (int i = 0; i < strlen(success); i++)
+     {
+       tcp_Connection.buffer[i] = success[i];
+       count3++;
+     }
+   
+     std::ifstream is(FilePath.c_str(), std::ifstream::binary);
+     
+     is.seekg(0, is.end);
+     int length = is.tellg();
+     is.seekg(0, is.beg);
 
-  string FilePath = database.get_website_file_path(URL);
-  string Location = "";
+     char* buffer5 = new char[length];
 
-  if (FilePath == "")
-  {
-    database.add_website_file_path(URL, "index.html", "FileStore/" + URL + "/");
-    Location = "FileStore/" + URL + "/";
-    cout << Location << endl;
-    if (stat(Location.c_str(), &st) == -1)
-    {
-      mkdir(Location.c_str(), 0700);
-    }
-
-    FilePath = Location + "index.html";
-    std::ofstream file(FilePath.c_str(), std::ios::binary);
-
-    file.write(&buffer[0], strlen(buffer));
-  }
-  int count3 = 0;
-  for (int i = 0; i < strlen(success); i++)
-  {
-    tcp_Connection.buffer[i] = success[i];
-    count3++;
-  }
-  
-  for (int i = 0; i < strlen(buffer); i++)
-  {
-    tcp_Connection.buffer[i+count3] = buffer[i];
-  }
+     is.read(buffer5,length);
+     
+     for (int i = 0; i < strlen(buffer5); i++)
+     {
+       tcp_Connection.buffer[i+count3] = buffer5[i];
+     }
+     
+     delete[] buffer5;
+   }
    
   fprintf(stderr, "\nQuery is:\n<<START>>\n%s<<END>>\n\n", tcp_Connection.buffer);
   
