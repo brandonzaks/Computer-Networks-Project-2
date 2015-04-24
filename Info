@@ -5,3 +5,6 @@ How to launch the server..
 g++ -c -I Boost/boost_1_57_0 -I C++MySQLConnector/mysql-connector-c++-1.1.5-linux-ubuntu12.04-x86-32bit/include main.cpp Database.cpp TCP_Connection.cpp
 g++ -o a.out main.o Database.o TCP_Connection.o -L C++MySQLConnector/mysql-connector-c++-1.1.5-linux-ubuntu12.04-x86-32bit/lib -lmysqlcppconn
 LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib ./a.out
+
+How to untar the zip file
+tar -zxvf Project2.tar.gz
