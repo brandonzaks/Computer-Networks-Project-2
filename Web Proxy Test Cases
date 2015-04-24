@@ -1,0 +1,14 @@
+Test Websites - you get blocked for these HTTP 400 message
+http://129.120.151.97:52216/http://www.facebook.com
+http://129.120.151.97:52216/http://www.youtube.com
+http://129.120.151.97:52216/http://www.virus.com
+http://129.120.151.97:52216/http://www.hulu.com
+
+When this page is run, one selected insult is blocked. We can enabled up to all though
+http://129.120.151.97:52216/http://www.hyperhero.com/en/insults.htm
+
+These work relativly well to see how things work on regular sites
+http://129.120.151.97:52216/http://www.msn.com
+http://129.120.151.97:52216/http://www.wikipedia.com
+
+Note: Images and javascript is not downloaded so some of the pages may look off. This is as per my conversation with the professor.
